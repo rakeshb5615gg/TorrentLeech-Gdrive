@@ -2,23 +2,24 @@
 # -*- coding: utf-8 -*-
 # (c) Shrimadhav U K | gautamajay52
 
-# the logging things
 import logging
 import os
 import shutil
+
+from pyrogram.types import CallbackQuery
+from tobrot import AUTH_CHANNEL, MAX_MESSAGE_LENGTH
+from tobrot.helper_funcs.admin_check import AdminCheck
+from tobrot.helper_funcs.download_aria_p_n import aria_start
+from tobrot.helper_funcs.youtube_dl_button import youtube_dl_call_back
+# the logging things
+from tobrot.plugins.choose_rclone_config import rclone_button_callback
+from tobrot.plugins.status_message_fn import cancel_message_f
+
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 LOGGER = logging.getLogger(__name__)
 
-from pyrogram.types import CallbackQuery
-from tobrot.helper_funcs.admin_check import AdminCheck
-from tobrot.helper_funcs.download_aria_p_n import aria_start
-from tobrot.helper_funcs.youtube_dl_button import youtube_dl_call_back
-from tobrot.plugins.status_message_fn import cancel_message_f
-from tobrot import (
-    MAX_MESSAGE_LENGTH,
-    AUTH_CHANNEL
-)
+
 async def button(bot, update: CallbackQuery):
     cb_data = update.data
     LOGGER.info(cb_data)
@@ -29,6 +30,9 @@ async def button(bot, update: CallbackQuery):
         LOGGER.info(ee)
     if "|" in cb_data:
         await youtube_dl_call_back(bot, update)
+    if cb_data.startswith("rclone"):
+        await rclone_button_callback(bot, update)
+        return
     LOGGER.info(update.from_user.id)
     LOGGER.info(update.message.reply_to_message.from_user.id)
     if cb_data.startswith("cancel"):
@@ -43,7 +47,8 @@ async def button(bot, update: CallbackQuery):
                     LOGGER.info(downloads)
                     file_name = downloads.name
                     LOGGER.info(downloads)
-                    LOGGER.info(aria_i_p.remove(downloads = [downloads], force=True, files=True, clean=True))
+                    LOGGER.info(aria_i_p.remove(
+                        downloads=[downloads], force=True, files=True, clean=True))
                     if os.path.exists(file_name):
                         if os.path.isdir(file_name):
                             shutil.rmtree(file_name)
@@ -56,7 +61,8 @@ async def button(bot, update: CallbackQuery):
                 #     await update.message.delete()
     elif cb_data == "fuckingdo":
         if update.from_user.id in AUTH_CHANNEL:
-            g_d_list = ['app.json', 'venv', 'rclone.conf', '.gitignore', '_config.yml', 'COPYING', 'Dockerfile', 'DOWNLOADS', 'Procfile', '.heroku', '.profile.d', 'rclone.jpg', 'README.md', 'requirements.txt', 'runtime.txt', 'start.sh', 'tobrot', 'gautam', 'Torrentleech-Gdrive.txt', 'vendor']
+            g_d_list = ['app.json', 'venv', 'rclone.conf', 'rclone_bak.conf', '.gitignore', '_config.yml', 'COPYING', 'Dockerfile', 'Procfile', '.heroku', '.profile.d', 'rclone.jpg',
+                        'README.md', 'requirements.txt', 'runtime.txt', 'start.sh', 'tobrot', 'gautam', 'Torrentleech-Gdrive.txt', 'vendor', 'LeechBot.session', 'LeechBot.session-journal']
             LOGGER.info(g_d_list)
             g_list = os.listdir()
             LOGGER.info(g_list)
@@ -75,4 +81,3 @@ async def button(bot, update: CallbackQuery):
             await update.message.edit_text("You are not allowed to do that 🤭")
     elif cb_data == "fuckoff":
         await update.message.edit_text("Okay! fine 🤬")
-                

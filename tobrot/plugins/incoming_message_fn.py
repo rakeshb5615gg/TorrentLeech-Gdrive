@@ -2,8 +2,28 @@
 # -*- coding: utf-8 -*-
 # (c) Shrimadhav U K | gautamajay52 | Akshay C
 
-# the logging things
+import asyncio
 import logging
+import os
+import time
+
+import aria2p
+import requests
+from tobrot import DOWNLOAD_LOCATION
+from tobrot.helper_funcs.admin_check import AdminCheck
+from tobrot.helper_funcs.cloneHelper import CloneHelper
+from tobrot.helper_funcs.display_progress import progress_for_pyrogram
+from tobrot.helper_funcs.download import download_tg
+from tobrot.helper_funcs.download_aria_p_n import (aria_start,
+                                                   call_apropriate_function,
+                                                   call_apropriate_function_g)
+from tobrot.helper_funcs.download_from_link import request_download
+from tobrot.helper_funcs.extract_link_from_message import extract_link
+# the logging things
+from tobrot.helper_funcs.upload_to_tg import upload_to_tg
+from tobrot.helper_funcs.youtube_dl_extractor import extract_youtube_dl_formats
+from tobrot.helper_funcs.ytplaylist import yt_playlist_downg
+
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -11,28 +31,6 @@ logging.basicConfig(
 logging.getLogger("pyrogram").setLevel(logging.WARNING)
 LOGGER = logging.getLogger(__name__)
 
-
-import os
-import requests
-
-from tobrot import (
-    DOWNLOAD_LOCATION
-)
-
-
-import time
-import aria2p
-import asyncio
-from tobrot.helper_funcs.extract_link_from_message import extract_link
-from tobrot.helper_funcs.download_aria_p_n import call_apropriate_function, call_apropriate_function_g, aria_start
-from tobrot.helper_funcs.download_from_link import request_download
-from tobrot.helper_funcs.display_progress import progress_for_pyrogram
-from tobrot.helper_funcs.youtube_dl_extractor import extract_youtube_dl_formats
-from tobrot.helper_funcs.admin_check import AdminCheck
-from tobrot.helper_funcs.ytplaylist import yt_playlist_downg
-from tobrot.helper_funcs.cloneHelper import CloneHelper
-from tobrot.helper_funcs.download import download_tg
-from tobrot.helper_funcs.upload_to_tg import upload_to_tg
 
 async def incoming_purge_message_f(client, message):
     """/purge command"""
@@ -45,6 +43,7 @@ async def incoming_purge_message_f(client, message):
             LOGGER.info(download.remove(force=True))
     await i_m_sefg2.delete()
 
+
 async def incoming_message_f(client, message):
     """/leech command"""
     g_id = message.from_user.id
@@ -55,13 +54,13 @@ async def incoming_message_f(client, message):
     is_unrar = False
     is_untar = False
     if len(message.command) > 1:
-        if message.command[1] == "archive":
+        if message.command[1].lower() == "archive":
             is_zip = True
-        elif message.command[1] == "unzip":
+        elif message.command[1].lower() == "unzip":
             is_unzip = True
-        elif message.command[1] == "unrar":
+        elif message.command[1].lower() == "unrar":
             is_unrar = True
-        elif message.command[1] == "untar":
+        elif message.command[1].lower() == "untar":
             is_untar = True
     # get link from the incoming message
     dl_url, cf_name, _, _ = await extract_link(message.reply_to_message, "LEECH")
@@ -105,6 +104,8 @@ async def incoming_message_f(client, message):
             f"<b>API Error</b>: {cf_name}"
         )
 #
+
+
 async def incoming_gdrive_message_f(client, message):
     """/gleech command"""
     g_id = message.from_user.id
@@ -115,13 +116,13 @@ async def incoming_gdrive_message_f(client, message):
     is_unrar = False
     is_untar = False
     if len(message.command) > 1:
-        if message.command[1] == "archive":
+        if message.command[1].lower() == "archive":
             is_zip = True
-        elif message.command[1] == "unzip":
+        elif message.command[1].lower() == "unzip":
             is_unzip = True
-        elif message.command[1] == "unrar":
+        elif message.command[1].lower() == "unrar":
             is_unrar = True
-        elif message.command[1] == "untar":
+        elif message.command[1].lower() == "untar":
             is_untar = True
     # get link from the incoming message
     dl_url, cf_name, _, _ = await extract_link(message.reply_to_message, "GLEECH")
@@ -174,16 +175,17 @@ async def incoming_youtube_dl_f(client, message):
         message.reply_to_message, "YTDL"
     )
     LOGGER.info(dl_url)
-    #if len(message.command) > 1:
-        #if message.command[1] == "gdrive":
-            #with open('blame_my_knowledge.txt', 'w+') as gg:
-                #gg.write("I am noob and don't know what to do that's why I have did this")
+    # if len(message.command) > 1:
+    # if message.command[1] == "gdrive":
+    # with open('blame_my_knowledge.txt', 'w+') as gg:
+    #gg.write("I am noob and don't know what to do that's why I have did this")
     LOGGER.info(cf_name)
     if dl_url is not None:
         await i_m_sefg.edit_text("extracting links")
         current_user_id = message.from_user.id
         # create an unique directory
-        user_working_dir = os.path.join(DOWNLOAD_LOCATION, str(current_user_id))
+        user_working_dir = os.path.join(
+            DOWNLOAD_LOCATION, str(current_user_id))
         # create download directory, if not exist
         if not os.path.isdir(user_working_dir):
             os.makedirs(user_working_dir)
@@ -201,7 +203,7 @@ async def incoming_youtube_dl_f(client, message):
         open(gau_tam, 'wb').write(req.content)
         if thumb_image is not None:
             await message.reply_photo(
-                #text_message,
+                # text_message,
                 photo=gau_tam,
                 quote=True,
                 caption=text_message,
@@ -218,10 +220,12 @@ async def incoming_youtube_dl_f(client, message):
             "**FCUK**! wat have you entered. \nPlease read /help \n"
             f"<b>API Error</b>: {cf_name}"
         )
-#playlist
+# playlist
+
+
 async def g_yt_playlist(client, message):
     """ /pytdl command """
-    #i_m_sefg = await message.reply_text("Processing...you should wait🤗", quote=True)
+    # i_m_sefg = await message.reply_text("Processing...you should wait🤗", quote=True)
     usr_id = message.from_user.id
     G_DRIVE = False
     if len(message.command) > 1:
@@ -230,11 +234,13 @@ async def g_yt_playlist(client, message):
     if 'youtube.com/playlist' in message.reply_to_message.text:
         i_m_sefg = await message.reply_text("Downloading...you should wait🤗", quote=True)
         await yt_playlist_downg(message.reply_to_message, i_m_sefg, G_DRIVE)
-    
+
     else:
         await message.reply_text("Reply to youtube playlist link only 🙄")
-        
+
  #
+
+
 async def g_clonee(client, message):
     """ /gclone command """
     g_id = message.from_user.id
@@ -254,7 +260,7 @@ async def g_clonee(client, message):
 async def rename_tg_file(client, message):
     usr_id = message.from_user.id
     if len(message.command) > 1:
-        new_name = '/app/' + message.command[1].strip()
+        new_name = '/app/' + message.text.split(" ", maxsplit=1)[1].strip()
         file = await download_tg(client, message)
         try:
             if file:

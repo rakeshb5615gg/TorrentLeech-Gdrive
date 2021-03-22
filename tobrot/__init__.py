@@ -2,15 +2,16 @@
 # -*- coding: utf-8 -*-
 # (c) Shrimadhav U K | gautamajay52
 
+import logging
 import os
 import time
-import logging
 
 # the secret configuration specific things
 if bool(os.environ.get("ENV", False)):
     from tobrot.sample_config import Config
 else:
     from tobrot.config import Config
+
 from logging.handlers import RotatingFileHandler
 
 # TODO: is there a better way?
@@ -57,10 +58,10 @@ LOG_COMMAND = Config.LOG_COMMAND
 CLONE_COMMAND_G = Config.CLONE_COMMAND_G
 UPLOAD_COMMAND = Config.UPLOAD_COMMAND
 RENEWME_COMMAND = Config.RENEWME_COMMAND
-
+SP_LIT_ALGO_RITH_M = Config.SP_LIT_ALGO_RITH_M
 if os.path.exists("TorrentLeech-Gdrive.txt"):
-	with open("Torrentleech-Gdrive.txt", "r+") as f_d:
-		f_d.truncate(0)
+    with open("Torrentleech-Gdrive.txt", "r+") as f_d:
+        f_d.truncate(0)
 
 # the logging things
 logging.basicConfig(
@@ -79,3 +80,13 @@ logging.basicConfig(
 logging.getLogger("pyrogram").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 LOGGER = logging.getLogger(__name__)
+
+def multi_rclone_init():
+    if not os.path.exists('rclone_bak.conf'):  # backup rclone.conf file
+        with open('rclone_bak.conf', 'w+', newline="\n", encoding='utf-8') as fole:
+            with open('rclone.conf', 'r') as f:
+                fole.write(f.read())
+        LOGGER.info("rclone.conf backuped to rclone_bak.conf!")
+
+
+multi_rclone_init()
